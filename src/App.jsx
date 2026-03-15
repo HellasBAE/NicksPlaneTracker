@@ -30,14 +30,15 @@ export default function App() {
   const [displayName, setDisplayName] = useState(saved?.displayName || '');
   const [address, setAddress] = useState(saved?.address || '');
   const [mapView, setMapView] = useState(saved?.mapView || null);
+  const [mapLayer, setMapLayer] = useState(saved?.mapLayer || 'Streets');
   const { geocode, loading, error: geoError } = useGeocode();
   const { planes, lastUpdated, error: planeError } = usePlaneData(homeCoords);
   const displayPlanes = useInterpolatedPlanes(planes);
 
   // Persist state changes to localStorage
   useEffect(() => {
-    saveState({ homeCoords, displayName, address, mapView });
-  }, [homeCoords, displayName, address, mapView]);
+    saveState({ homeCoords, displayName, address, mapView, mapLayer });
+  }, [homeCoords, displayName, address, mapView, mapLayer]);
 
   const handleLocate = async (addr) => {
     setAddress(addr);
@@ -67,7 +68,9 @@ export default function App() {
         displayName={displayName}
         planes={displayPlanes}
         savedMapView={mapView}
+        savedLayer={mapLayer}
         onMapMove={handleMapMove}
+        onLayerChange={setMapLayer}
       />
 
       {homeCoords && (

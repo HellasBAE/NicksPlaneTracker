@@ -25,14 +25,23 @@ function RecenterMap({ coords }) {
   return null;
 }
 
-function MapEventTracker({ onMapMove }) {
+function MapEventTracker({ onMapMove, onLayerChange }) {
+  const map = useMap();
+
   useMapEvents({
     moveend: (e) => {
-      const map = e.target;
-      const center = map.getCenter();
-      onMapMove({ lat: center.lat, lng: center.lng }, map.getZoom());
+      const m = e.target;
+      const center = m.getCenter();
+      onMapMove({ lat: center.lat, lng: center.lng }, m.getZoom());
     },
   });
+
+  useEffect(() => {
+    const handler = (e) => onLayerChange(e.name);
+    map.on('baselayerchange', handler);
+    return () => map.off('baselayerchange', handler);
+  }, [map, onLayerChange]);
+
   return null;
 }
 
@@ -70,7 +79,7 @@ const TILE_LAYERS = [
   },
 ];
 
-export default function MapView({ homeCoords, displayName, planes, savedMapView, onMapMove }) {
+export default function MapView({ homeCoords, displayName, planes, savedMapView, savedLayer, onMapMove, onLayerChange }) {
   const initialCenter = savedMapView?.center
     ? [savedMapView.center.lat, savedMapView.center.lng]
     : DEFAULT_CENTER;
@@ -87,14 +96,14 @@ export default function MapView({ homeCoords, displayName, planes, savedMapView,
           <LayersControl.BaseLayer
             key={layer.name}
             name={layer.name}
-            checked={layer.checked || false}
+            checked={savedLayer ? layer.name === savedLayer : (layer.checked || false)}
           >
             <TileLayer url={layer.url} attribution={layer.attribution} />
           </LayersControl.BaseLayer>
         ))}
       </LayersControl>
       <RecenterMap coords={homeCoords} />
-      <MapEventTracker onMapMove={onMapMove} />
+      <MapEventTracker onMapMove={onMapMove} onLayerChange={onLayerChange} />
       {homeCoords && <HomeMarker position={homeCoords} displayName={displayName} />}
       <PlaneLayer planes={planes} />
     </MapContainer>
