@@ -1,5 +1,6 @@
 import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import { getAirline } from '../utils/airlines';
 
 function createPlaneIcon(heading) {
   return L.divIcon({
@@ -18,12 +19,14 @@ function createPlaneIcon(heading) {
 
 export default function PlaneMarker({ plane }) {
   const icon = createPlaneIcon(plane.heading);
+  const airline = getAirline(plane.callsign);
 
   return (
     <Marker position={[plane.lat, plane.lng]} icon={icon}>
       <Popup>
         <div style={{ minWidth: 150 }}>
           <strong>{plane.callsign || 'Unknown'}</strong>
+          {airline && <><br />{airline}</>}
           <br />
           ICAO: {plane.icao24}
           <br />
