@@ -5,8 +5,14 @@ import { getAircraftInfoAsync } from '../utils/airlines';
 import { getPlaneSvg } from '../utils/planeSilhouettes';
 import { getAircraftPhoto } from '../utils/aircraftPhotos';
 
-function createPlaneIcon(heading, color, size, icaoType) {
-  const svg = getPlaneSvg(icaoType, color, size);
+const FAVORITE_COLOR = '#ffd700';
+
+function createPlaneIcon(heading, color, size, icaoType, isFav) {
+  const displayColor = isFav ? FAVORITE_COLOR : color;
+  const svg = getPlaneSvg(icaoType, displayColor, size);
+  const glow = isFav
+    ? `filter:drop-shadow(0 0 4px ${FAVORITE_COLOR}) drop-shadow(0 0 8px ${FAVORITE_COLOR});`
+    : '';
   return L.divIcon({
     html: `<div style="
       display:flex;
@@ -16,6 +22,7 @@ function createPlaneIcon(heading, color, size, icaoType) {
       height:${size}px;
       transform:rotate(${heading || 0}deg);
       transition: transform 1s linear;
+      ${glow}
     ">${svg}</div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -23,14 +30,14 @@ function createPlaneIcon(heading, color, size, icaoType) {
   });
 }
 
-export default function PlaneMarker({ plane, color, size }) {
+export default function PlaneMarker({ plane, color, size, isFavorite, onTrack, onUntrack }) {
   const [info, setInfo] = useState({ airline: null, aircraftType: null, icaoType: null, registration: null });
 
   useEffect(() => {
     getAircraftInfoAsync(plane.callsign, plane.icao24, setInfo);
   }, [plane.callsign, plane.icao24]);
 
-  const icon = createPlaneIcon(plane.heading, color, size, info.icaoType);
+  const icon = createPlaneIcon(plane.heading, color, size, info.icaoType, isFavorite);
 
   const [photoSrc, setPhotoSrc] = useState(null);
 
@@ -42,6 +49,16 @@ export default function PlaneMarker({ plane, color, size }) {
     });
     return () => { cancelled = true; };
   }, [info.registration, info.icaoType]);
+
+  const handleTrack = () => {
+    onTrack({
+      icao24: plane.icao24,
+      callsign: plane.callsign,
+      aircraftType: info.aircraftType,
+      registration: info.registration,
+      airline: info.airline,
+    });
+  };
 
   return (
     <Marker position={[plane.lat, plane.lng]} icon={icon}>
@@ -67,25 +84,32 @@ export default function PlaneMarker({ plane, color, size }) {
           <br />
           Heading: {plane.heading != null ? `${Math.round(plane.heading)}°` : 'N/A'}
           {plane.onGround && <><br /><em>On ground</em></>}
-          <div style={{ marginTop: 6, fontSize: '0.85em' }}>
-            {info.registration && (
-              <a
-                href={`https://www.flightradar24.com/data/aircraft/${info.registration}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ marginRight: 8 }}
-              >
-                FlightRadar24
-              </a>
-            )}
-            {info.icaoType && (
-              <a
-                href={`https://contentzone.eurocontrol.int/aircraftperformance/details.aspx?ICAO=${info.icaoType}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Tech Specs
-              </a>
+          <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontSize: '0.85em' }}>
+              {info.registration && (
+                <a
+                  href={`https://www.flightradar24.com/data/aircraft/${info.registration}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ marginRight: 8 }}
+                >
+                  FlightRadar24
+                </a>
+              )}
+              {info.icaoType && (
+                <a
+                  href={`https://contentzone.eurocontrol.int/aircraftperformance/details.aspx?ICAO=${info.icaoType}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Tech Specs
+                </a>
+              )}
+            </div>
+            {isFavorite ? (
+              <button onClick={() => onUntrack(plane.icao24)} className="track-btn untrack">Untrack</button>
+            ) : (
+              <button onClick={handleTrack} className="track-btn">Track</button>
             )}
           </div>
         </div>

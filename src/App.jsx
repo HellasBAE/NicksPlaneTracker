@@ -1,9 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import AddressInput from './components/AddressInput';
 import MapView from './components/MapView';
+import FavoritesPanel from './components/FavoritesPanel';
+import NearbyBanner from './components/NearbyBanner';
 import { useGeocode } from './hooks/useGeocode';
 import { usePlaneData } from './hooks/usePlaneData';
 import { useInterpolatedPlanes } from './hooks/useInterpolatedPlanes';
+import { useFavorites } from './hooks/useFavorites';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 
@@ -33,9 +36,11 @@ export default function App() {
   const [mapLayer, setMapLayer] = useState(saved?.mapLayer || 'Streets');
   const [planeColor, setPlaneColor] = useState(saved?.planeColor || '#e94560');
   const [planeSize, setPlaneSize] = useState(saved?.planeSize || 32);
+  const [showFavorites, setShowFavorites] = useState(false);
   const { geocode, loading, error: geoError } = useGeocode();
   const { planes, lastUpdated, error: planeError } = usePlaneData(homeCoords);
   const displayPlanes = useInterpolatedPlanes(planes);
+  const { favorites, addFavorite, removeFavorite, updateNotes, isFavorite } = useFavorites();
 
   // Persist state changes to localStorage
   useEffect(() => {
@@ -55,27 +60,65 @@ export default function App() {
     setMapView({ center, zoom });
   }, []);
 
+  // Find which favorites are currently nearby (visible in plane data)
+  const nearbyIcaos = useMemo(() => {
+    const set = new Set();
+    for (const p of planes) {
+      if (favorites[p.icao24]) set.add(p.icao24);
+    }
+    return set;
+  }, [planes, favorites]);
+
+  const nearbyFavorites = useMemo(() => {
+    return [...nearbyIcaos].map((id) => favorites[id]).filter(Boolean);
+  }, [nearbyIcaos, favorites]);
+
+  const favCount = Object.keys(favorites).length;
+
   return (
     <div className="app">
       <header className="header">
         <h1>Nick's Plane Tracker</h1>
         <AddressInput onLocate={handleLocate} loading={loading} initialValue={address} />
+        <button
+          className="favorites-toggle"
+          onClick={() => setShowFavorites((v) => !v)}
+        >
+          Tracked ({favCount})
+        </button>
       </header>
+
+      <NearbyBanner nearbyFavorites={nearbyFavorites} />
 
       {geoError && <div className="error">Geocoding error: {geoError}</div>}
       {planeError && <div className="error">Plane data error: {planeError}</div>}
 
-      <MapView
-        homeCoords={homeCoords}
-        displayName={displayName}
-        planes={displayPlanes}
-        savedMapView={mapView}
-        savedLayer={mapLayer}
-        onMapMove={handleMapMove}
-        onLayerChange={setMapLayer}
-        planeColor={planeColor}
-        planeSize={planeSize}
-      />
+      <div className="main-content">
+        <MapView
+          homeCoords={homeCoords}
+          displayName={displayName}
+          planes={displayPlanes}
+          savedMapView={mapView}
+          savedLayer={mapLayer}
+          onMapMove={handleMapMove}
+          onLayerChange={setMapLayer}
+          planeColor={planeColor}
+          planeSize={planeSize}
+          isFavorite={isFavorite}
+          onTrack={addFavorite}
+          onUntrack={removeFavorite}
+        />
+
+        {showFavorites && (
+          <FavoritesPanel
+            favorites={favorites}
+            nearbyIcaos={nearbyIcaos}
+            onUpdateNotes={updateNotes}
+            onRemove={removeFavorite}
+            onClose={() => setShowFavorites(false)}
+          />
+        )}
+      </div>
 
       <div className="status-bar">
         {homeCoords && (

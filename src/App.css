@@ -62,7 +62,55 @@
   cursor: not-allowed;
 }
 
-.map-container {
+/* Favorites toggle button in header */
+.favorites-toggle {
+  padding: 8px 14px;
+  background: #ffd700;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.favorites-toggle:hover {
+  background: #ffed4a;
+}
+
+/* Nearby favorites banner */
+.nearby-banner {
+  padding: 8px 16px;
+  background: linear-gradient(90deg, #ffd700, #ffed4a);
+  color: #1a1a2e;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: banner-pulse 2s ease-in-out infinite;
+  z-index: 999;
+}
+
+.nearby-banner-icon {
+  font-size: 1.1rem;
+}
+
+@keyframes banner-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+/* Main content area with map and favorites side panel */
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+.main-content .map-container {
   flex: 1;
   width: 100%;
 }
@@ -126,4 +174,211 @@
 .plane-settings input[type="range"] {
   width: 80px;
   cursor: pointer;
+}
+
+/* Track/Untrack button in popup */
+.track-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #ffd700;
+  color: #1a1a2e;
+  white-space: nowrap;
+}
+
+.track-btn:hover {
+  background: #ffed4a;
+}
+
+.track-btn.untrack {
+  background: #666;
+  color: #fff;
+}
+
+.track-btn.untrack:hover {
+  background: #888;
+}
+
+/* Favorites side panel */
+.favorites-panel {
+  width: 320px;
+  min-width: 320px;
+  background: #1a1a2e;
+  color: #ccc;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #333;
+  z-index: 800;
+  overflow: hidden;
+}
+
+.favorites-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #333;
+}
+
+.favorites-header h2 {
+  font-size: 1rem;
+  color: #ffd700;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+.favorites-empty {
+  padding: 24px 16px;
+  color: #888;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.favorites-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.favorite-item {
+  padding: 10px 16px;
+  border-bottom: 1px solid #2a2a4a;
+}
+
+.favorite-item.nearby {
+  background: rgba(255, 215, 0, 0.08);
+  border-left: 3px solid #ffd700;
+}
+
+.favorite-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.favorite-info strong {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.favorite-detail {
+  font-size: 0.78rem;
+  color: #999;
+}
+
+.nearby-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  background: #ffd700;
+  color: #1a1a2e;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.remove-btn:hover {
+  color: #e94560;
+}
+
+.favorite-notes {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: #16213e;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  min-height: 28px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.favorite-notes:hover {
+  background: #1e2d4f;
+}
+
+.note-placeholder {
+  color: #555;
+  font-style: italic;
+}
+
+.favorite-notes-edit {
+  margin-top: 6px;
+}
+
+.favorite-notes-edit textarea {
+  width: 100%;
+  padding: 6px 8px;
+  background: #16213e;
+  color: #ccc;
+  border: 1px solid #ffd700;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.note-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.note-actions button {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.note-actions button:first-child {
+  background: #ffd700;
+  color: #1a1a2e;
+  font-weight: 600;
+}
+
+.note-actions button:last-child {
+  background: #333;
+  color: #ccc;
+}
+
+/* Responsive: stack favorites below on small screens */
+@media (max-width: 768px) {
+  .favorites-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 280px;
+    min-width: 280px;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+  }
 }
