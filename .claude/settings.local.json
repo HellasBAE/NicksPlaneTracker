@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:openskynetwork.github.io)",
+      "WebFetch(domain:nominatim.org)",
+      "WebFetch(domain:operations.osmfoundation.org)",
+      "Bash(npm create:*)",
+      "Bash(npx:*)",
+      "Bash(cp:*)",
+      "Bash(npm install:*)",
+      "Bash(git init:*)"
+    ]
+  }
+}
