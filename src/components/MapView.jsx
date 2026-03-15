@@ -79,7 +79,7 @@ const TILE_LAYERS = [
   },
 ];
 
-export default function MapView({ homeCoords, displayName, planes, savedMapView, savedLayer, onMapMove, onLayerChange }) {
+export default function MapView({ homeCoords, displayName, planes, savedMapView, savedLayer, onMapMove, onLayerChange, planeColor, planeSize }) {
   const initialCenter = savedMapView?.center
     ? [savedMapView.center.lat, savedMapView.center.lng]
     : DEFAULT_CENTER;
@@ -105,7 +105,7 @@ export default function MapView({ homeCoords, displayName, planes, savedMapView,
       <RecenterMap coords={homeCoords} />
       <MapEventTracker onMapMove={onMapMove} onLayerChange={onLayerChange} />
       {homeCoords && <HomeMarker position={homeCoords} displayName={displayName} />}
-      <PlaneLayer planes={planes} />
+      <PlaneLayer planes={planes} planeColor={planeColor} planeSize={planeSize} />
     </MapContainer>
   );
 }

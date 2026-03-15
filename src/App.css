@@ -85,9 +85,45 @@
 
 .status-bar {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: 6px 16px;
   background: #16213e;
   color: #ccc;
   font-size: 0.8rem;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.status-info {
+  white-space: nowrap;
+}
+
+.plane-settings {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.plane-settings label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.plane-settings input[type="color"] {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+}
+
+.plane-settings input[type="range"] {
+  width: 80px;
+  cursor: pointer;
 }

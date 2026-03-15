@@ -31,14 +31,16 @@ export default function App() {
   const [address, setAddress] = useState(saved?.address || '');
   const [mapView, setMapView] = useState(saved?.mapView || null);
   const [mapLayer, setMapLayer] = useState(saved?.mapLayer || 'Streets');
+  const [planeColor, setPlaneColor] = useState(saved?.planeColor || '#e94560');
+  const [planeSize, setPlaneSize] = useState(saved?.planeSize || 32);
   const { geocode, loading, error: geoError } = useGeocode();
   const { planes, lastUpdated, error: planeError } = usePlaneData(homeCoords);
   const displayPlanes = useInterpolatedPlanes(planes);
 
   // Persist state changes to localStorage
   useEffect(() => {
-    saveState({ homeCoords, displayName, address, mapView, mapLayer });
-  }, [homeCoords, displayName, address, mapView, mapLayer]);
+    saveState({ homeCoords, displayName, address, mapView, mapLayer, planeColor, planeSize });
+  }, [homeCoords, displayName, address, mapView, mapLayer, planeColor, planeSize]);
 
   const handleLocate = async (addr) => {
     setAddress(addr);
@@ -71,16 +73,39 @@ export default function App() {
         savedLayer={mapLayer}
         onMapMove={handleMapMove}
         onLayerChange={setMapLayer}
+        planeColor={planeColor}
+        planeSize={planeSize}
       />
 
-      {homeCoords && (
-        <div className="status-bar">
-          <span>{planes.length} plane{planes.length !== 1 ? 's' : ''} nearby</span>
-          {lastUpdated && (
-            <span>Last updated: {lastUpdated.toLocaleTimeString()}</span>
-          )}
+      <div className="status-bar">
+        {homeCoords && (
+          <span className="status-info">
+            {planes.length} plane{planes.length !== 1 ? 's' : ''} nearby
+            {lastUpdated && <> &middot; {lastUpdated.toLocaleTimeString()}</>}
+          </span>
+        )}
+        <div className="plane-settings">
+          <label>
+            Color
+            <input
+              type="color"
+              value={planeColor}
+              onChange={(e) => setPlaneColor(e.target.value)}
+            />
+          </label>
+          <label>
+            Size
+            <input
+              type="range"
+              min="16"
+              max="56"
+              value={planeSize}
+              onChange={(e) => setPlaneSize(Number(e.target.value))}
+            />
+            <span>{planeSize}px</span>
+          </label>
         </div>
-      )}
+      </div>
     </div>
   );
 }
