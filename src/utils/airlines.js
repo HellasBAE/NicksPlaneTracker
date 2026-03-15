@@ -94,20 +94,46 @@ const AIRLINES = {
   WZZ: 'Wizz Air',
 };
 
-// Runtime cache for API lookups: icao24 → { airline, aircraftType }
+// Runtime cache for API lookups: icao24 → result object
 const apiCache = {};
+// Track permanently failed lookups (404s) separately from rate limits
+const failedLookups = new Set();
 
-/**
- * Look up aircraft details by ICAO24 hex code via hexdb.io.
- * Returns { airline, aircraftType } or null. Results are cached.
- */
-async function lookupByIcao24(icao24) {
-  if (icao24 in apiCache) return apiCache[icao24];
+// Throttled request queue — max 3 concurrent, 200ms between starts
+const queue = [];
+let activeRequests = 0;
+const MAX_CONCURRENT = 3;
+const DELAY_MS = 200;
 
+function processQueue() {
+  while (activeRequests < MAX_CONCURRENT && queue.length > 0) {
+    const { icao24, resolve } = queue.shift();
+    activeRequests++;
+    fetchAircraft(icao24)
+      .then(resolve)
+      .finally(() => {
+        activeRequests--;
+        setTimeout(processQueue, DELAY_MS);
+      });
+  }
+}
+
+function enqueue(icao24) {
+  return new Promise((resolve) => {
+    queue.push({ icao24, resolve });
+    processQueue();
+  });
+}
+
+async function fetchAircraft(icao24) {
   try {
     const res = await fetch(`https://hexdb.io/api/v1/aircraft/${icao24}`);
+    if (res.status === 404) {
+      failedLookups.add(icao24);
+      return null;
+    }
     if (!res.ok) {
-      apiCache[icao24] = null;
+      // Rate limited or server error — don't cache so it can retry
       return null;
     }
     const data = await res.json();
@@ -120,9 +146,18 @@ async function lookupByIcao24(icao24) {
     apiCache[icao24] = result;
     return result;
   } catch {
-    apiCache[icao24] = null;
     return null;
   }
+}
+
+/**
+ * Look up aircraft details by ICAO24 hex code via hexdb.io.
+ * Uses throttled queue to avoid rate limiting.
+ */
+async function lookupByIcao24(icao24) {
+  if (icao24 in apiCache) return apiCache[icao24];
+  if (failedLookups.has(icao24)) return null;
+  return enqueue(icao24);
 }
 
 /**
