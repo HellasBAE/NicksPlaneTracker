@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, LayersControl, useMap } from 'react-leaflet';
 import { useEffect } from 'react';
 import HomeMarker from './HomeMarker';
 import PlaneLayer from './PlaneLayer';
@@ -14,6 +14,40 @@ function RecenterMap({ coords }) {
   return null;
 }
 
+const TILE_LAYERS = [
+  {
+    name: 'Streets',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    checked: true,
+  },
+  {
+    name: 'Satellite',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri',
+  },
+  {
+    name: 'Terrain',
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+  },
+  {
+    name: 'Minimal (No Roads)',
+    url: 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+  },
+  {
+    name: 'Dark',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+  },
+  {
+    name: 'Dark (No Roads)',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+  },
+];
+
 export default function MapView({ homeCoords, displayName, planes }) {
   return (
     <MapContainer
@@ -21,10 +55,17 @@ export default function MapView({ homeCoords, displayName, planes }) {
       zoom={DEFAULT_ZOOM}
       className="map-container"
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <LayersControl position="topright">
+        {TILE_LAYERS.map((layer) => (
+          <LayersControl.BaseLayer
+            key={layer.name}
+            name={layer.name}
+            checked={layer.checked || false}
+          >
+            <TileLayer url={layer.url} attribution={layer.attribution} />
+          </LayersControl.BaseLayer>
+        ))}
+      </LayersControl>
       <RecenterMap coords={homeCoords} />
       {homeCoords && <HomeMarker position={homeCoords} displayName={displayName} />}
       <PlaneLayer planes={planes} />

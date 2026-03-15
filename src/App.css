@@ -67,6 +67,15 @@
   width: 100%;
 }
 
+/* Smooth plane marker movement */
+.plane-icon {
+  transition: transform 1s linear;
+}
+
+.leaflet-marker-icon.plane-icon {
+  transition: transform 1s linear !important;
+}
+
 .error {
   padding: 8px 16px;
   background: #ffe0e0;

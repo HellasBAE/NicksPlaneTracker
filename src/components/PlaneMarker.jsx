@@ -3,10 +3,16 @@ import L from 'leaflet';
 
 function createPlaneIcon(heading) {
   return L.divIcon({
-    html: `<div style="font-size:22px;text-align:center;line-height:1;transform:rotate(${heading || 0}deg)">✈️</div>`,
+    html: `<div style="
+      font-size:22px;
+      text-align:center;
+      line-height:1;
+      transform:rotate(${heading || 0}deg);
+      transition: transform 1s linear;
+    ">✈️</div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
-    className: '',
+    className: 'plane-icon',
   });
 }
 
