@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-export default function AddressInput({ onLocate, loading }) {
-  const [address, setAddress] = useState('');
+export default function AddressInput({ onLocate, loading, initialValue = '' }) {
+  const [address, setAddress] = useState(initialValue);
 
   const handleSubmit = (e) => {
     e.preventDefault();

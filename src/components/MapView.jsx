@@ -1,16 +1,38 @@
-import { MapContainer, TileLayer, LayersControl, useMap } from 'react-leaflet';
-import { useEffect } from 'react';
+import { MapContainer, TileLayer, LayersControl, useMap, useMapEvents } from 'react-leaflet';
+import { useEffect, useRef } from 'react';
 import HomeMarker from './HomeMarker';
 import PlaneLayer from './PlaneLayer';
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from '../constants';
 
 function RecenterMap({ coords }) {
   const map = useMap();
+  const hasRecentered = useRef(false);
+
+  useEffect(() => {
+    if (coords && !hasRecentered.current) {
+      map.setView([coords.lat, coords.lng], DEFAULT_ZOOM);
+      hasRecentered.current = true;
+    }
+  }, [coords, map]);
+
+  // Reset when coords change (new address search)
   useEffect(() => {
     if (coords) {
       map.setView([coords.lat, coords.lng], DEFAULT_ZOOM);
     }
-  }, [coords, map]);
+  }, [coords?.lat, coords?.lng]);
+
+  return null;
+}
+
+function MapEventTracker({ onMapMove }) {
+  useMapEvents({
+    moveend: (e) => {
+      const map = e.target;
+      const center = map.getCenter();
+      onMapMove({ lat: center.lat, lng: center.lng }, map.getZoom());
+    },
+  });
   return null;
 }
 
@@ -48,11 +70,16 @@ const TILE_LAYERS = [
   },
 ];
 
-export default function MapView({ homeCoords, displayName, planes }) {
+export default function MapView({ homeCoords, displayName, planes, savedMapView, onMapMove }) {
+  const initialCenter = savedMapView?.center
+    ? [savedMapView.center.lat, savedMapView.center.lng]
+    : DEFAULT_CENTER;
+  const initialZoom = savedMapView?.zoom || DEFAULT_ZOOM;
+
   return (
     <MapContainer
-      center={DEFAULT_CENTER}
-      zoom={DEFAULT_ZOOM}
+      center={initialCenter}
+      zoom={initialZoom}
       className="map-container"
     >
       <LayersControl position="topright">
@@ -67,6 +94,7 @@ export default function MapView({ homeCoords, displayName, planes }) {
         ))}
       </LayersControl>
       <RecenterMap coords={homeCoords} />
+      <MapEventTracker onMapMove={onMapMove} />
       {homeCoords && <HomeMarker position={homeCoords} displayName={displayName} />}
       <PlaneLayer planes={planes} />
     </MapContainer>
