@@ -114,6 +114,8 @@ async function lookupByIcao24(icao24) {
     const result = {
       airline: data.RegisteredOwners || data.OperatorFlagCode || null,
       aircraftType: data.Type || data.ICAOTypeCode || null,
+      icaoType: data.ICAOTypeCode || null,
+      registration: data.Registration || null,
     };
     apiCache[icao24] = result;
     return result;
@@ -141,14 +143,18 @@ export function getAircraftInfoAsync(callsign, icao24, onResult) {
   if (icao24 in apiCache && apiCache[icao24]) {
     const cached = apiCache[icao24];
     const airline = getAirline(callsign) || cached.airline;
-    onResult({ airline, aircraftType: cached.aircraftType });
+    onResult({ airline, aircraftType: cached.aircraftType, icaoType: cached.icaoType, registration: cached.registration });
     return;
   }
 
   // Fetch from API
   lookupByIcao24(icao24).then((result) => {
     const airline = getAirline(callsign) || result?.airline || null;
-    const aircraftType = result?.aircraftType || null;
-    onResult({ airline, aircraftType });
+    onResult({
+      airline,
+      aircraftType: result?.aircraftType || null,
+      icaoType: result?.icaoType || null,
+      registration: result?.registration || null,
+    });
   });
 }

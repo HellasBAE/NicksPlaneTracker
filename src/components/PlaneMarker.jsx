@@ -48,21 +48,44 @@ function createPlaneIcon(heading, color, size) {
 
 export default function PlaneMarker({ plane, color, size }) {
   const icon = createPlaneIcon(plane.heading, color, size);
-  const [info, setInfo] = useState({ airline: null, aircraftType: null });
+  const [info, setInfo] = useState({ airline: null, aircraftType: null, icaoType: null, registration: null });
 
   useEffect(() => {
     getAircraftInfoAsync(plane.callsign, plane.icao24, setInfo);
   }, [plane.callsign, plane.icao24]);
 
+  const photoUrl = info.registration
+    ? `https://api.planespotters.net/pub/photos/reg/${info.registration}`
+    : null;
+  const [photoSrc, setPhotoSrc] = useState(null);
+
+  useEffect(() => {
+    if (!photoUrl) { setPhotoSrc(null); return; }
+    fetch(photoUrl)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.photos?.[0]?.thumbnail_large?.src) {
+          setPhotoSrc(data.photos[0].thumbnail_large.src);
+        }
+      })
+      .catch(() => setPhotoSrc(null));
+  }, [photoUrl]);
+
   return (
     <Marker position={[plane.lat, plane.lng]} icon={icon}>
-      <Popup>
-        <div style={{ minWidth: 160 }}>
-          <strong>{plane.callsign || 'Unknown'}</strong>
+      <Popup maxWidth={280}>
+        <div style={{ minWidth: 200 }}>
+          {photoSrc && (
+            <img
+              src={photoSrc}
+              alt={info.aircraftType || 'Aircraft'}
+              style={{ width: '100%', borderRadius: 4, marginBottom: 6 }}
+            />
+          )}
+          <strong style={{ fontSize: '1.05em' }}>{plane.callsign || 'Unknown'}</strong>
           {info.airline && <><br />{info.airline}</>}
           {info.aircraftType && <><br />Aircraft: {info.aircraftType}</>}
-          <br />
-          ICAO: {plane.icao24}
+          {info.registration && <><br />Reg: {info.registration}</>}
           <br />
           Country: {plane.country}
           <br />
@@ -72,6 +95,27 @@ export default function PlaneMarker({ plane, color, size }) {
           <br />
           Heading: {plane.heading != null ? `${Math.round(plane.heading)}°` : 'N/A'}
           {plane.onGround && <><br /><em>On ground</em></>}
+          <div style={{ marginTop: 6, fontSize: '0.85em' }}>
+            {info.registration && (
+              <a
+                href={`https://www.flightradar24.com/data/aircraft/${info.registration}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ marginRight: 8 }}
+              >
+                FlightRadar24
+              </a>
+            )}
+            {info.icaoType && (
+              <a
+                href={`https://contentzone.eurocontrol.int/aircraftperformance/details.aspx?ICAO=${info.icaoType}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Tech Specs
+              </a>
+            )}
+          </div>
         </div>
       </Popup>
     </Marker>
