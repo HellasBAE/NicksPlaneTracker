@@ -3,6 +3,7 @@ import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { getAircraftInfoAsync } from '../utils/airlines';
 import { getPlaneSvg } from '../utils/planeSilhouettes';
+import { getAircraftPhoto } from '../utils/aircraftPhotos';
 
 function createPlaneIcon(heading, color, size, icaoType) {
   const svg = getPlaneSvg(icaoType, color, size);
@@ -31,22 +32,16 @@ export default function PlaneMarker({ plane, color, size }) {
 
   const icon = createPlaneIcon(plane.heading, color, size, info.icaoType);
 
-  const photoUrl = info.registration
-    ? `https://api.planespotters.net/pub/photos/reg/${info.registration}`
-    : null;
   const [photoSrc, setPhotoSrc] = useState(null);
 
   useEffect(() => {
-    if (!photoUrl) { setPhotoSrc(null); return; }
-    fetch(photoUrl)
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => {
-        if (data?.photos?.[0]?.thumbnail_large?.src) {
-          setPhotoSrc(data.photos[0].thumbnail_large.src);
-        }
-      })
-      .catch(() => setPhotoSrc(null));
-  }, [photoUrl]);
+    if (!info.registration && !info.icaoType) return;
+    let cancelled = false;
+    getAircraftPhoto(info.registration, info.icaoType).then((src) => {
+      if (!cancelled) setPhotoSrc(src);
+    });
+    return () => { cancelled = true; };
+  }, [info.registration, info.icaoType]);
 
   return (
     <Marker position={[plane.lat, plane.lng]} icon={icon}>
