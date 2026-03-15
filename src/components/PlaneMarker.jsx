@@ -2,15 +2,23 @@ import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { getAirline } from '../utils/airlines';
 
+// SVG plane icon pointing north (0°) by default for correct rotation
+const PLANE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <path d="M12 2 L14 9 L21 11 L14 13 L14 20 L12 18 L10 20 L10 13 L3 11 L10 9 Z"
+    fill="#e94560" stroke="#fff" stroke-width="0.8"/>
+</svg>`;
+
 function createPlaneIcon(heading) {
   return L.divIcon({
     html: `<div style="
-      font-size:22px;
-      text-align:center;
-      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:28px;
+      height:28px;
       transform:rotate(${heading || 0}deg);
       transition: transform 1s linear;
-    ">✈️</div>`,
+    ">${PLANE_SVG}</div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
     className: 'plane-icon',
