@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import { getAirline } from '../utils/airlines';
+import { getAirlineAsync } from '../utils/airlines';
 
 function planeSvg(color, size) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${size}" height="${size}">
@@ -47,7 +48,11 @@ function createPlaneIcon(heading, color, size) {
 
 export default function PlaneMarker({ plane, color, size }) {
   const icon = createPlaneIcon(plane.heading, color, size);
-  const airline = getAirline(plane.callsign);
+  const [airline, setAirline] = useState(null);
+
+  useEffect(() => {
+    getAirlineAsync(plane.callsign, plane.icao24, setAirline);
+  }, [plane.callsign, plane.icao24]);
 
   return (
     <Marker position={[plane.lat, plane.lng]} icon={icon}>
