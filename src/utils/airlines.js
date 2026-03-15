@@ -94,12 +94,12 @@ const AIRLINES = {
   WZZ: 'Wizz Air',
 };
 
-// Runtime cache for API lookups (prefix → name or null)
+// Runtime cache for API lookups: icao24 → { airline, aircraftType }
 const apiCache = {};
 
 /**
- * Look up airline by ICAO24 hex code via hexdb.io.
- * Returns airline name or null. Results are cached in memory.
+ * Look up aircraft details by ICAO24 hex code via hexdb.io.
+ * Returns { airline, aircraftType } or null. Results are cached.
  */
 async function lookupByIcao24(icao24) {
   if (icao24 in apiCache) return apiCache[icao24];
@@ -111,9 +111,12 @@ async function lookupByIcao24(icao24) {
       return null;
     }
     const data = await res.json();
-    const name = data.RegisteredOwners || data.OperatorFlagCode || null;
-    apiCache[icao24] = name;
-    return name;
+    const result = {
+      airline: data.RegisteredOwners || data.OperatorFlagCode || null,
+      aircraftType: data.Type || data.ICAOTypeCode || null,
+    };
+    apiCache[icao24] = result;
+    return result;
   } catch {
     apiCache[icao24] = null;
     return null;
@@ -121,9 +124,7 @@ async function lookupByIcao24(icao24) {
 }
 
 /**
- * Get airline name - first tries callsign prefix, then falls back to
- * ICAO24 hex lookup. Returns { name, pending } where pending means
- * an async lookup is in progress.
+ * Get airline name from callsign prefix (static table).
  */
 export function getAirline(callsign) {
   if (!callsign || callsign.length < 3) return null;
@@ -132,23 +133,22 @@ export function getAirline(callsign) {
 }
 
 /**
- * Get airline info, trying callsign first then icao24 hex API lookup.
- * Calls onResult(name) when the API lookup resolves.
+ * Get aircraft info (airline + type) via callsign prefix and icao24 API lookup.
+ * Calls onResult({ airline, aircraftType }) when resolved.
  */
-export function getAirlineAsync(callsign, icao24, onResult) {
-  // Try static lookup first
-  const staticResult = getAirline(callsign);
-  if (staticResult) {
-    onResult(staticResult);
-    return;
-  }
-
-  // Try cached API result
-  if (icao24 in apiCache) {
-    onResult(apiCache[icao24]);
+export function getAircraftInfoAsync(callsign, icao24, onResult) {
+  // Check cache first
+  if (icao24 in apiCache && apiCache[icao24]) {
+    const cached = apiCache[icao24];
+    const airline = getAirline(callsign) || cached.airline;
+    onResult({ airline, aircraftType: cached.aircraftType });
     return;
   }
 
   // Fetch from API
-  lookupByIcao24(icao24).then(onResult);
+  lookupByIcao24(icao24).then((result) => {
+    const airline = getAirline(callsign) || result?.airline || null;
+    const aircraftType = result?.aircraftType || null;
+    onResult({ airline, aircraftType });
+  });
 }
