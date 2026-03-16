@@ -55,8 +55,10 @@ export default function App() {
     return null;
   }, [openskyUsername, openskyPassword]);
 
+  const [viewBbox, setViewBbox] = useState(null);
+
   const { planes, lastUpdated, error: planeError, currentInterval, rateLimited } =
-    usePlaneData(homeCoords, { pollInterval, paused, credentials });
+    usePlaneData(homeCoords, viewBbox, { pollInterval, paused, credentials });
 
   const displayPlanes = useInterpolatedPlanes(planes);
   const {
@@ -90,6 +92,19 @@ export default function App() {
   const handleMapMove = useCallback((center, zoom) => {
     setMapView({ center, zoom });
   }, []);
+
+  const handleBoundsChange = useCallback((bbox) => {
+    setViewBbox(bbox);
+  }, []);
+
+  // Detect if the map center is far from home (>10km)
+  const isAwayFromHome = useMemo(() => {
+    if (!homeCoords || !mapView?.center) return false;
+    const dlat = homeCoords.lat - mapView.center.lat;
+    const dlng = homeCoords.lng - mapView.center.lng;
+    const distKm = Math.sqrt(dlat * dlat + dlng * dlng) * 111;
+    return distKm > 10;
+  }, [homeCoords, mapView?.center]);
 
   const handleSettingsSave = (settings) => {
     setPollInterval(settings.pollInterval);
@@ -199,6 +214,7 @@ export default function App() {
           savedMapView={mapView}
           savedLayer={mapLayer}
           onMapMove={handleMapMove}
+          onBoundsChange={handleBoundsChange}
           onLayerChange={setMapLayer}
           planeColor={planeColor}
           planeSize={planeSize}
@@ -208,6 +224,7 @@ export default function App() {
           followingIcao={followingIcao}
           flyToTarget={flyToTarget}
           onFlyToArrived={() => setFlyToTarget(null)}
+          isAwayFromHome={isAwayFromHome}
         />
 
         {showFavorites && (

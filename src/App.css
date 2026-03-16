@@ -115,6 +115,30 @@
   width: 100%;
 }
 
+/* Back to Home button on map */
+.back-to-home-btn {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  padding: 8px 20px;
+  background: #1a1a2e;
+  color: #ffd700;
+  border: 2px solid #ffd700;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s;
+}
+
+.back-to-home-btn:hover {
+  background: #ffd700;
+  color: #1a1a2e;
+}
+
 /* Smooth plane marker movement */
 .plane-icon {
   transition: transform 1s linear;

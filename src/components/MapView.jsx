@@ -1,5 +1,5 @@
 import { MapContainer, TileLayer, LayersControl, useMap, useMapEvents } from 'react-leaflet';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import HomeMarker from './HomeMarker';
 import PlaneLayer from './PlaneLayer';
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from '../constants';
@@ -56,16 +56,40 @@ function FlyToTarget({ target, onArrived }) {
   return null;
 }
 
-function MapEventTracker({ onMapMove, onLayerChange }) {
+function MapEventTracker({ onMapMove, onBoundsChange, onLayerChange }) {
   const map = useMap();
+  const debounceRef = useRef(null);
 
   useMapEvents({
     moveend: (e) => {
       const m = e.target;
       const center = m.getCenter();
       onMapMove({ lat: center.lat, lng: center.lng }, m.getZoom());
+
+      // Debounce bounds update (1s after stop moving)
+      clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        const bounds = m.getBounds();
+        onBoundsChange({
+          south: bounds.getSouth(),
+          west: bounds.getWest(),
+          north: bounds.getNorth(),
+          east: bounds.getEast(),
+        });
+      }, 1000);
     },
   });
+
+  // Report initial bounds
+  useEffect(() => {
+    const bounds = map.getBounds();
+    onBoundsChange({
+      south: bounds.getSouth(),
+      west: bounds.getWest(),
+      north: bounds.getNorth(),
+      east: bounds.getEast(),
+    });
+  }, [map, onBoundsChange]);
 
   useEffect(() => {
     const handler = (e) => onLayerChange(e.name);
@@ -74,6 +98,22 @@ function MapEventTracker({ onMapMove, onLayerChange }) {
   }, [map, onLayerChange]);
 
   return null;
+}
+
+function BackToHomeButton({ homeCoords, isAway }) {
+  const map = useMap();
+
+  if (!homeCoords || !isAway) return null;
+
+  const handleClick = () => {
+    map.flyTo([homeCoords.lat, homeCoords.lng], DEFAULT_ZOOM, { duration: 1.5 });
+  };
+
+  return (
+    <div className="back-to-home-btn" onClick={handleClick}>
+      Back to Home
+    </div>
+  );
 }
 
 const TILE_LAYERS = [
@@ -110,7 +150,7 @@ const TILE_LAYERS = [
   },
 ];
 
-export default function MapView({ homeCoords, displayName, planes, savedMapView, savedLayer, onMapMove, onLayerChange, planeColor, planeSize, isFavorite, onTrack, onUntrack, followingIcao, flyToTarget, onFlyToArrived }) {
+export default function MapView({ homeCoords, displayName, planes, savedMapView, savedLayer, onMapMove, onBoundsChange, onLayerChange, planeColor, planeSize, isFavorite, onTrack, onUntrack, followingIcao, flyToTarget, onFlyToArrived, isAwayFromHome }) {
   const initialCenter = savedMapView?.center
     ? [savedMapView.center.lat, savedMapView.center.lng]
     : DEFAULT_CENTER;
@@ -134,7 +174,8 @@ export default function MapView({ homeCoords, displayName, planes, savedMapView,
         ))}
       </LayersControl>
       <RecenterMap coords={homeCoords} />
-      <MapEventTracker onMapMove={onMapMove} onLayerChange={onLayerChange} />
+      <MapEventTracker onMapMove={onMapMove} onBoundsChange={onBoundsChange} onLayerChange={onLayerChange} />
+      <BackToHomeButton homeCoords={homeCoords} isAway={isAwayFromHome} />
       {homeCoords && <HomeMarker position={homeCoords} displayName={displayName} />}
       <FollowPlane planes={planes} followingIcao={followingIcao} />
       <FlyToTarget target={flyToTarget} onArrived={onFlyToArrived} />

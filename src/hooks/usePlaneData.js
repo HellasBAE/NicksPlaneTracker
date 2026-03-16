@@ -5,7 +5,12 @@ import { SEARCH_RADIUS_KM } from '../constants';
 
 const MAX_BACKOFF_MS = 120000;
 
-export function usePlaneData(homeCoords, { pollInterval, paused, credentials }) {
+/**
+ * @param homeCoords - { lat, lng } of the home address (used as fallback)
+ * @param viewBbox - { south, west, north, east } from the current map view (preferred)
+ * @param options - { pollInterval, paused, credentials }
+ */
+export function usePlaneData(homeCoords, viewBbox, { pollInterval, paused, credentials }) {
   const [planes, setPlanes] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [error, setError] = useState(null);
@@ -14,8 +19,13 @@ export function usePlaneData(homeCoords, { pollInterval, paused, credentials }) 
   const timeoutRef = useRef(null);
   const consecutiveErrors = useRef(0);
   const activeInterval = useRef(pollInterval);
+  const bboxRef = useRef(null);
 
-  // Update active interval when user changes it
+  // Keep bbox ref up to date without triggering re-fetches on every pan
+  useEffect(() => {
+    bboxRef.current = viewBbox;
+  }, [viewBbox]);
+
   useEffect(() => {
     activeInterval.current = pollInterval;
     setCurrentInterval(pollInterval);
@@ -34,7 +44,8 @@ export function usePlaneData(homeCoords, { pollInterval, paused, credentials }) 
 
     const load = async () => {
       try {
-        const bbox = getBoundingBox(homeCoords.lat, homeCoords.lng, SEARCH_RADIUS_KM);
+        // Use map view bounds if available, otherwise fall back to home radius
+        const bbox = bboxRef.current || getBoundingBox(homeCoords.lat, homeCoords.lng, SEARCH_RADIUS_KM);
         const data = await fetchPlanes(bbox, credentials);
         setPlanes(data);
         setLastUpdated(new Date());
