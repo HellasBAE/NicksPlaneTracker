@@ -21,6 +21,7 @@ export default function FavoritesPanel({
   const [showCreateTag, setShowCreateTag] = useState(false);
   const [renamingFolder, setRenamingFolder] = useState(null);
   const [renameText, setRenameText] = useState('');
+  const [confirmingUntrack, setConfirmingUntrack] = useState(null);
 
   const favList = useMemo(() => {
     const all = Object.values(favorites);
@@ -182,9 +183,6 @@ export default function FavoritesPanel({
                     <button onClick={() => setShowManage(showManage === fav.icao24 ? null : fav.icao24)} className="manage-btn" title="Manage">
                       ...
                     </button>
-                    <button onClick={() => onRemove(fav.icao24)} className="remove-btn" title="Untrack">
-                      &times;
-                    </button>
                   </div>
                 </div>
 
@@ -253,6 +251,19 @@ export default function FavoritesPanel({
                           <button className="create-tag-btn" onClick={() => setShowCreateTag(true)}>+ New Tag</button>
                         )}
                       </div>
+                    </div>
+
+                    {/* Untrack with confirmation */}
+                    <div className="manage-section untrack-section">
+                      {confirmingUntrack === fav.icao24 ? (
+                        <div className="untrack-confirm">
+                          <span>Untrack this plane?</span>
+                          <button className="untrack-yes" onClick={() => { onRemove(fav.icao24); setConfirmingUntrack(null); setShowManage(null); }}>Yes, Untrack</button>
+                          <button className="untrack-no" onClick={() => setConfirmingUntrack(null)}>Cancel</button>
+                        </div>
+                      ) : (
+                        <button className="untrack-btn" onClick={() => setConfirmingUntrack(fav.icao24)}>Untrack Plane</button>
+                      )}
                     </div>
                   </div>
                 )}
