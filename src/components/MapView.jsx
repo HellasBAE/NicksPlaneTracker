@@ -25,6 +25,20 @@ function RecenterMap({ coords }) {
   return null;
 }
 
+function FollowPlane({ planes, followingIcao }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!followingIcao) return;
+    const plane = planes.find((p) => p.icao24 === followingIcao);
+    if (plane) {
+      map.setView([plane.lat, plane.lng], map.getZoom(), { animate: true });
+    }
+  }, [planes, followingIcao, map]);
+
+  return null;
+}
+
 function MapEventTracker({ onMapMove, onLayerChange }) {
   const map = useMap();
 
@@ -79,7 +93,7 @@ const TILE_LAYERS = [
   },
 ];
 
-export default function MapView({ homeCoords, displayName, planes, savedMapView, savedLayer, onMapMove, onLayerChange, planeColor, planeSize, isFavorite, onTrack, onUntrack }) {
+export default function MapView({ homeCoords, displayName, planes, savedMapView, savedLayer, onMapMove, onLayerChange, planeColor, planeSize, isFavorite, onTrack, onUntrack, followingIcao }) {
   const initialCenter = savedMapView?.center
     ? [savedMapView.center.lat, savedMapView.center.lng]
     : DEFAULT_CENTER;
@@ -105,6 +119,7 @@ export default function MapView({ homeCoords, displayName, planes, savedMapView,
       <RecenterMap coords={homeCoords} />
       <MapEventTracker onMapMove={onMapMove} onLayerChange={onLayerChange} />
       {homeCoords && <HomeMarker position={homeCoords} displayName={displayName} />}
+      <FollowPlane planes={planes} followingIcao={followingIcao} />
       <PlaneLayer planes={planes} planeColor={planeColor} planeSize={planeSize} isFavorite={isFavorite} onTrack={onTrack} onUntrack={onUntrack} />
     </MapContainer>
   );

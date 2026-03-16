@@ -58,7 +58,13 @@ export default function App() {
     usePlaneData(homeCoords, { pollInterval, paused, credentials });
 
   const displayPlanes = useInterpolatedPlanes(planes);
-  const { favorites, addFavorite, removeFavorite, updateNotes, isFavorite } = useFavorites();
+  const {
+    favorites, addFavorite, removeFavorite, updateNotes, updateFavorite,
+    setCustomName, toggleFavoriteFolder, toggleFavoriteTag, isFavorite,
+    folders, createFolder, renameFolder, deleteFolder,
+    tags, createTag, deleteTag,
+  } = useFavorites();
+  const [followingIcao, setFollowingIcao] = useState(null);
 
   // Persist state changes to localStorage
   useEffect(() => {
@@ -134,14 +140,27 @@ export default function App() {
           isFavorite={isFavorite}
           onTrack={addFavorite}
           onUntrack={removeFavorite}
+          followingIcao={followingIcao}
         />
 
         {showFavorites && (
           <FavoritesPanel
             favorites={favorites}
             nearbyIcaos={nearbyIcaos}
+            folders={folders}
+            tags={tags}
             onUpdateNotes={updateNotes}
             onRemove={removeFavorite}
+            onSetCustomName={setCustomName}
+            onToggleFolder={toggleFavoriteFolder}
+            onToggleTag={toggleFavoriteTag}
+            onCreateFolder={createFolder}
+            onRenameFolder={renameFolder}
+            onDeleteFolder={deleteFolder}
+            onCreateTag={createTag}
+            onDeleteTag={deleteTag}
+            onFollowPlane={(icao24) => setFollowingIcao((prev) => prev === icao24 ? null : icao24)}
+            followingIcao={followingIcao}
             onClose={() => setShowFavorites(false)}
           />
         )}

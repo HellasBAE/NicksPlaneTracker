@@ -427,8 +427,8 @@
 
 /* Favorites side panel */
 .favorites-panel {
-  width: 320px;
-  min-width: 320px;
+  width: 360px;
+  min-width: 360px;
   background: #1a1a2e;
   color: #ccc;
   display: flex;
@@ -593,6 +593,329 @@
   color: #ccc;
 }
 
+/* Folder tabs */
+.folder-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 8px;
+  background: #16213e;
+  border-bottom: 1px solid #333;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.folder-tab {
+  padding: 4px 10px;
+  background: #2a2a4a;
+  color: #999;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.folder-tab.active {
+  background: #ffd700;
+  color: #1a1a2e;
+  font-weight: 600;
+}
+
+.folder-tab:hover:not(.active) {
+  background: #3a3a5a;
+}
+
+.folder-tab.add-folder {
+  background: #333;
+  color: #888;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+}
+
+.folder-delete {
+  font-size: 0.85rem;
+  opacity: 0.5;
+  cursor: pointer;
+  margin-left: 2px;
+}
+
+.folder-delete:hover {
+  opacity: 1;
+  color: #e94560;
+}
+
+.folder-rename-input {
+  width: 70px;
+  padding: 1px 4px;
+  background: #16213e;
+  color: #ccc;
+  border: 1px solid #ffd700;
+  border-radius: 2px;
+  font-size: 0.75rem;
+}
+
+.folder-create-inline {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.folder-create-inline input {
+  width: 90px;
+  padding: 3px 6px;
+  background: #16213e;
+  color: #ccc;
+  border: 1px solid #444;
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.folder-create-inline button {
+  padding: 3px 8px;
+  background: #ffd700;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* Favorite item enhancements */
+.favorite-item.following {
+  background: rgba(110, 168, 254, 0.1);
+  border-left: 3px solid #6ea8fe;
+}
+
+.favorite-title-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.favorite-name.clickable {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+.favorite-name.clickable:hover {
+  color: #6ea8fe;
+}
+
+.following-badge {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 6px;
+  background: #6ea8fe;
+  color: #1a1a2e;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.favorite-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.manage-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 4px;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.manage-btn:hover {
+  color: #fff;
+}
+
+/* Tags on favorite items */
+.favorite-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.tag-pill {
+  display: inline-block;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 1px solid;
+}
+
+/* Manage panel (folders/tags/name) */
+.manage-panel {
+  margin-top: 8px;
+  padding: 8px;
+  background: #0f1525;
+  border-radius: 4px;
+  border: 1px solid #333;
+}
+
+.manage-section {
+  margin-bottom: 8px;
+}
+
+.manage-section:last-child {
+  margin-bottom: 0;
+}
+
+.manage-section > label {
+  display: block;
+  font-size: 0.72rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.manage-value {
+  padding: 4px 6px;
+  background: #16213e;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  min-height: 24px;
+}
+
+.manage-value.clickable {
+  cursor: pointer;
+}
+
+.manage-value.clickable:hover {
+  background: #1e2d4f;
+}
+
+.inline-edit {
+  display: flex;
+  gap: 4px;
+}
+
+.inline-edit input {
+  flex: 1;
+  padding: 4px 6px;
+  background: #16213e;
+  color: #ccc;
+  border: 1px solid #ffd700;
+  border-radius: 3px;
+  font-size: 0.8rem;
+}
+
+.inline-edit button {
+  padding: 4px 8px;
+  background: #ffd700;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.manage-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  accent-color: #ffd700;
+}
+
+.tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.tag-delete {
+  margin-left: auto;
+  color: #666;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.tag-delete:hover {
+  color: #e94560;
+}
+
+.tag-create-inline {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.tag-create-inline input[type="text"] {
+  flex: 1;
+  padding: 3px 6px;
+  background: #16213e;
+  color: #ccc;
+  border: 1px solid #444;
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.tag-create-inline input[type="color"] {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #444;
+  border-radius: 3px;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+}
+
+.tag-create-inline button {
+  padding: 3px 8px;
+  background: #ffd700;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.create-tag-btn {
+  padding: 3px 8px;
+  background: #2a2a4a;
+  color: #888;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  margin-top: 4px;
+}
+
+.create-tag-btn:hover {
+  background: #3a3a5a;
+  color: #ccc;
+}
+
 /* Responsive: stack favorites below on small screens */
 @media (max-width: 768px) {
   .favorites-panel {
@@ -600,8 +923,8 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: 280px;
-    min-width: 280px;
+    width: 320px;
+    min-width: 320px;
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
   }
 }
