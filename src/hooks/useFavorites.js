@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { SYSTEM_FOLDERS, SEEDED_PLANES } from '../data/systemFolders';
 
 const FAVORITES_KEY = 'npt_favorites';
 const FOLDERS_KEY = 'npt_folders';
@@ -35,6 +36,10 @@ export function useFavorites() {
   useEffect(() => { saveJson(FAVORITES_KEY, favorites); }, [favorites]);
   useEffect(() => { saveJson(FOLDERS_KEY, folders); }, [folders]);
   useEffect(() => { saveJson(TAGS_KEY, tags); }, [tags]);
+
+  // Merge system folders + seeded planes into the exposed data
+  const allFavorites = useMemo(() => ({ ...SEEDED_PLANES, ...favorites }), [favorites]);
+  const allFolders = useMemo(() => ({ ...SYSTEM_FOLDERS, ...folders }), [folders]);
 
   // --- Favorites ---
   const addFavorite = useCallback((plane) => {
@@ -103,8 +108,13 @@ export function useFavorites() {
   }, []);
 
   const isFavorite = useCallback((icao24) => {
-    return icao24 in favorites;
+    return icao24 in favorites || icao24 in SEEDED_PLANES;
   }, [favorites]);
+
+  // Check if a plane is a system/seeded entry (not user-editable)
+  const isSystemPlane = useCallback((id) => {
+    return id in SEEDED_PLANES;
+  }, []);
 
   // --- Folders ---
   const createFolder = useCallback((name) => {
@@ -160,9 +170,9 @@ export function useFavorites() {
   }, []);
 
   return {
-    favorites, addFavorite, removeFavorite, updateNotes, updateFavorite,
-    setCustomName, toggleFavoriteFolder, toggleFavoriteTag, isFavorite,
-    folders, createFolder, renameFolder, deleteFolder,
+    favorites: allFavorites, addFavorite, removeFavorite, updateNotes, updateFavorite,
+    setCustomName, toggleFavoriteFolder, toggleFavoriteTag, isFavorite, isSystemPlane,
+    folders: allFolders, createFolder, renameFolder, deleteFolder,
     tags, createTag, deleteTag,
   };
 }

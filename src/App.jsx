@@ -8,7 +8,7 @@ import { useGeocode } from './hooks/useGeocode';
 import { usePlaneData } from './hooks/usePlaneData';
 import { useInterpolatedPlanes } from './hooks/useInterpolatedPlanes';
 import { useFavorites } from './hooks/useFavorites';
-import { fetchPlaneByIcao24 } from './services/opensky';
+import { fetchPlaneByIcao24, fetchPlaneByRegistration } from './services/opensky';
 import { POLL_INTERVAL_MS } from './constants';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
@@ -61,7 +61,7 @@ export default function App() {
   const displayPlanes = useInterpolatedPlanes(planes);
   const {
     favorites, addFavorite, removeFavorite, updateNotes, updateFavorite,
-    setCustomName, toggleFavoriteFolder, toggleFavoriteTag, isFavorite,
+    setCustomName, toggleFavoriteFolder, toggleFavoriteTag, isFavorite, isSystemPlane,
     folders, createFolder, renameFolder, deleteFolder,
     tags, createTag, deleteTag,
   } = useFavorites();
@@ -123,11 +123,23 @@ export default function App() {
     // Look up the plane globally via OpenSky
     setLocatingPlane(icao24);
     try {
-      const plane = await fetchPlaneByIcao24(icao24, credentials);
+      let plane = null;
+
+      // For seeded/system planes, try registration-based lookup first
+      const favEntry = favorites[icao24];
+      if (favEntry?.registration && icao24.startsWith('seed_')) {
+        plane = await fetchPlaneByRegistration(favEntry.registration, credentials);
+      }
+
+      // Fall back to icao24 lookup if not a seed or reg lookup failed
+      if (!plane && !icao24.startsWith('seed_')) {
+        plane = await fetchPlaneByIcao24(icao24, credentials);
+      }
+
       if (plane) {
         setInjectedPlane(plane);
         setFlyToTarget({ lat: plane.lat, lng: plane.lng });
-        setFollowingIcao(icao24);
+        setFollowingIcao(plane.icao24);
       } else {
         setLocatingPlane(null);
         alert('Plane not found — it may not be airborne right now.');
@@ -137,7 +149,7 @@ export default function App() {
       alert('Could not look up plane — rate limited. Try again shortly.');
     }
     setLocatingPlane(null);
-  }, [followingIcao, displayPlanes, credentials]);
+  }, [followingIcao, displayPlanes, credentials, favorites]);
 
   // Clear injected plane when real data includes it
   useEffect(() => {
@@ -216,6 +228,7 @@ export default function App() {
             onDeleteTag={deleteTag}
             onFollowPlane={handleFollowPlane}
             locatingPlane={locatingPlane}
+            isSystemPlane={isSystemPlane}
             followingIcao={followingIcao}
             onClose={() => setShowFavorites(false)}
           />

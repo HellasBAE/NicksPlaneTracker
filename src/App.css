@@ -635,6 +635,20 @@
   padding: 4px 8px;
 }
 
+.system-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  background: #e94560;
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 800;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
 .folder-delete {
   font-size: 0.85rem;
   opacity: 0.5;

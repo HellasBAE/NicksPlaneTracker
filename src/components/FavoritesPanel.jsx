@@ -7,6 +7,7 @@ export default function FavoritesPanel({
   onCreateFolder, onRenameFolder, onDeleteFolder,
   onCreateTag, onDeleteTag,
   onFollowPlane, followingIcao, locatingPlane,
+  isSystemPlane,
   onClose,
 }) {
   const [activeTab, setActiveTab] = useState('all'); // 'all' | folder id
@@ -90,8 +91,8 @@ export default function FavoritesPanel({
             key={folder.id}
             className={`folder-tab ${activeTab === folder.id ? 'active' : ''}`}
             onClick={() => { setActiveTab(folder.id); setShowManage(null); setConfirmingUntrack(null); }}
-            onDoubleClick={() => { setRenamingFolder(folder.id); setRenameText(folder.name); }}
-            title="Double-click to rename"
+            onDoubleClick={() => { if (!folder.system) { setRenamingFolder(folder.id); setRenameText(folder.name); } }}
+            title={folder.system ? 'System folder' : 'Double-click to rename'}
           >
             {renamingFolder === folder.id ? (
               <input
@@ -105,14 +106,17 @@ export default function FavoritesPanel({
               />
             ) : (
               <>
+                {folder.system && <span className="system-icon">S</span>}
                 {folder.name}
-                <span
-                  className="folder-delete"
-                  onClick={(e) => { e.stopPropagation(); onDeleteFolder(folder.id); if (activeTab === folder.id) setActiveTab('all'); }}
-                  title="Delete folder"
-                >
-                  &times;
-                </span>
+                {!folder.system && (
+                  <span
+                    className="folder-delete"
+                    onClick={(e) => { e.stopPropagation(); onDeleteFolder(folder.id); if (activeTab === folder.id) setActiveTab('all'); }}
+                    title="Delete folder"
+                  >
+                    &times;
+                  </span>
+                )}
               </>
             )}
           </button>
@@ -145,6 +149,7 @@ export default function FavoritesPanel({
             const isNearby = nearbyIcaos.has(fav.icao24);
             const isFollowing = followingIcao === fav.icao24;
             const isLocating = locatingPlane === fav.icao24;
+            const isSystem = isSystemPlane(fav.icao24);
             const favTags = (fav.tags || []).map((id) => tags[id]).filter(Boolean);
 
             return (
@@ -181,11 +186,13 @@ export default function FavoritesPanel({
                       </div>
                     )}
                   </div>
-                  <div className="favorite-actions">
-                    <button onClick={() => setShowManage(showManage === fav.icao24 ? null : fav.icao24)} className="manage-btn" title="Manage">
-                      ...
-                    </button>
-                  </div>
+                  {!isSystem && (
+                    <div className="favorite-actions">
+                      <button onClick={() => setShowManage(showManage === fav.icao24 ? null : fav.icao24)} className="manage-btn" title="Manage">
+                        ...
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Manage dropdown */}
