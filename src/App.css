@@ -440,6 +440,43 @@
   background: #ffed4a;
 }
 
+/* Folder picker in track popup */
+.track-folder-picker {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.track-folder-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.track-folder-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #333;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.track-folder-option input[type="checkbox"] {
+  accent-color: #e94560;
+}
+
+.track-folder-hint {
+  font-size: 0.7rem;
+  color: #999;
+  margin-top: 4px;
+  font-style: italic;
+}
+
 .track-btn.untrack {
   background: #666;
   color: #fff;

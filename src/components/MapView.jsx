@@ -150,7 +150,7 @@ const TILE_LAYERS = [
   },
 ];
 
-export default function MapView({ homeCoords, displayName, planes, savedMapView, savedLayer, onMapMove, onBoundsChange, onLayerChange, planeColor, planeSize, isFavorite, onTrack, onUntrack, followingIcao, flyToTarget, onFlyToArrived, isAwayFromHome }) {
+export default function MapView({ homeCoords, displayName, planes, savedMapView, savedLayer, onMapMove, onBoundsChange, onLayerChange, planeColor, planeSize, isFavorite, onTrack, onUntrack, folders, onToggleFolder, followingIcao, flyToTarget, onFlyToArrived, isAwayFromHome }) {
   const initialCenter = savedMapView?.center
     ? [savedMapView.center.lat, savedMapView.center.lng]
     : DEFAULT_CENTER;
@@ -179,7 +179,7 @@ export default function MapView({ homeCoords, displayName, planes, savedMapView,
       {homeCoords && <HomeMarker position={homeCoords} displayName={displayName} />}
       <FollowPlane planes={planes} followingIcao={followingIcao} />
       <FlyToTarget target={flyToTarget} onArrived={onFlyToArrived} />
-      <PlaneLayer planes={planes} planeColor={planeColor} planeSize={planeSize} isFavorite={isFavorite} onTrack={onTrack} onUntrack={onUntrack} />
+      <PlaneLayer planes={planes} planeColor={planeColor} planeSize={planeSize} isFavorite={isFavorite} onTrack={onTrack} onUntrack={onUntrack} folders={folders} onToggleFolder={onToggleFolder} />
     </MapContainer>
   );
 }

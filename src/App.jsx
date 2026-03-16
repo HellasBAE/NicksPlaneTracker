@@ -221,6 +221,8 @@ export default function App() {
           isFavorite={isFavorite}
           onTrack={addFavorite}
           onUntrack={removeFavorite}
+          folders={folders}
+          onToggleFolder={toggleFavoriteFolder}
           followingIcao={followingIcao}
           flyToTarget={flyToTarget}
           onFlyToArrived={() => setFlyToTarget(null)}

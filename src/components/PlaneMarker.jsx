@@ -30,7 +30,7 @@ function createPlaneIcon(heading, color, size, icaoType, isFav) {
   });
 }
 
-export default function PlaneMarker({ plane, color, size, isFavorite, onTrack, onUntrack }) {
+export default function PlaneMarker({ plane, color, size, isFavorite, onTrack, onUntrack, folders, onToggleFolder }) {
   const [info, setInfo] = useState({ airline: null, aircraftType: null, icaoType: null, registration: null });
 
   useEffect(() => {
@@ -50,15 +50,25 @@ export default function PlaneMarker({ plane, color, size, isFavorite, onTrack, o
     return () => { cancelled = true; };
   }, [info.registration, info.icaoType]);
 
+  const [showFolderPicker, setShowFolderPicker] = useState(false);
+  const [selectedFolders, setSelectedFolders] = useState([]);
+
   const handleTrack = () => {
-    onTrack({
+    const planeData = {
       icao24: plane.icao24,
       callsign: plane.callsign,
       aircraftType: info.aircraftType,
       registration: info.registration,
       airline: info.airline,
-    });
+    };
+    onTrack(planeData);
+    // Apply selected folders
+    selectedFolders.forEach((fid) => onToggleFolder(plane.icao24, fid));
+    setShowFolderPicker(false);
+    setSelectedFolders([]);
   };
+
+  const folderList = Object.values(folders || {}).filter((f) => !f.system);
 
   return (
     <Marker position={[plane.lat, plane.lng]} icon={icon}>
@@ -108,10 +118,30 @@ export default function PlaneMarker({ plane, color, size, isFavorite, onTrack, o
             </div>
             {isFavorite ? (
               <button onClick={() => onUntrack(plane.icao24)} className="track-btn untrack">Untrack</button>
+            ) : showFolderPicker ? (
+              <button onClick={handleTrack} className="track-btn">Confirm</button>
             ) : (
-              <button onClick={handleTrack} className="track-btn">Track</button>
+              <button onClick={() => folderList.length > 0 ? setShowFolderPicker(true) : handleTrack()} className="track-btn">Track</button>
             )}
           </div>
+          {showFolderPicker && !isFavorite && folderList.length > 0 && (
+            <div className="track-folder-picker">
+              <div className="track-folder-label">Add to folder:</div>
+              {folderList.map((f) => (
+                <label key={f.id} className="track-folder-option">
+                  <input
+                    type="checkbox"
+                    checked={selectedFolders.includes(f.id)}
+                    onChange={() => setSelectedFolders((prev) =>
+                      prev.includes(f.id) ? prev.filter((x) => x !== f.id) : [...prev, f.id]
+                    )}
+                  />
+                  {f.name}
+                </label>
+              ))}
+              <div className="track-folder-hint">Or just hit Confirm to track without a folder</div>
+            </div>
+          )}
         </div>
       </Popup>
     </Marker>
