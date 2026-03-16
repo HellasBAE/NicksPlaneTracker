@@ -31,6 +31,7 @@ export default function FavoritesPanel({
   }, [favorites, activeTab]);
 
   const folderList = Object.values(folders);
+  const userFolderList = folderList.filter((f) => !f.system);
   const tagList = Object.values(tags);
 
   const startEdit = (fav, field) => {
@@ -216,17 +217,24 @@ export default function FavoritesPanel({
                     <div className="manage-section">
                       <label>Folders</label>
                       <div className="manage-checkboxes">
-                        {folderList.length === 0 && <span className="note-placeholder">No folders yet</span>}
                         {folderList.map((folder) => (
                           <label key={folder.id} className="checkbox-label">
                             <input
                               type="checkbox"
                               checked={(fav.folders || []).includes(folder.id)}
                               onChange={() => onToggleFolder(fav.icao24, folder.id)}
+                              disabled={folder.system}
                             />
+                            {folder.system && <span className="system-icon">S</span>}
                             {folder.name}
                           </label>
                         ))}
+                        {userFolderList.length === 0 && (
+                          <span className="note-placeholder">No custom folders yet</span>
+                        )}
+                        {showCreateFolder ? null : (
+                          <button className="create-tag-btn" onClick={() => setShowCreateFolder(true)}>+ New Folder</button>
+                        )}
                       </div>
                     </div>
 
