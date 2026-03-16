@@ -81,7 +81,7 @@ export default function FavoritesPanel({
       <div className="folder-tabs">
         <button
           className={`folder-tab ${activeTab === 'all' ? 'active' : ''}`}
-          onClick={() => setActiveTab('all')}
+          onClick={() => { setActiveTab('all'); setShowManage(null); setConfirmingUntrack(null); }}
         >
           All
         </button>
@@ -89,7 +89,7 @@ export default function FavoritesPanel({
           <button
             key={folder.id}
             className={`folder-tab ${activeTab === folder.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(folder.id)}
+            onClick={() => { setActiveTab(folder.id); setShowManage(null); setConfirmingUntrack(null); }}
             onDoubleClick={() => { setRenamingFolder(folder.id); setRenameText(folder.name); }}
             title="Double-click to rename"
           >
