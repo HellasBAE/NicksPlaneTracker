@@ -8,6 +8,7 @@ import { useGeocode } from './hooks/useGeocode';
 import { usePlaneData } from './hooks/usePlaneData';
 import { useInterpolatedPlanes } from './hooks/useInterpolatedPlanes';
 import { useFavorites } from './hooks/useFavorites';
+import { fetchPlaneByIcao24 } from './services/opensky';
 import { POLL_INTERVAL_MS } from './constants';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
@@ -65,6 +66,9 @@ export default function App() {
     tags, createTag, deleteTag,
   } = useFavorites();
   const [followingIcao, setFollowingIcao] = useState(null);
+  const [flyToTarget, setFlyToTarget] = useState(null);
+  const [locatingPlane, setLocatingPlane] = useState(null);
+  const [injectedPlane, setInjectedPlane] = useState(null);
 
   // Persist state changes to localStorage
   useEffect(() => {
@@ -92,6 +96,55 @@ export default function App() {
     setOpenskyUsername(settings.openskyUsername);
     setOpenskyPassword(settings.openskyPassword);
   };
+
+  // Merge injected plane (from locate) into display planes if not already present
+  const mergedPlanes = useMemo(() => {
+    if (!injectedPlane) return displayPlanes;
+    if (displayPlanes.some((p) => p.icao24 === injectedPlane.icao24)) return displayPlanes;
+    return [...displayPlanes, injectedPlane];
+  }, [displayPlanes, injectedPlane]);
+
+  // Handle clicking a tracked plane to locate and follow it
+  const handleFollowPlane = useCallback(async (icao24) => {
+    // If already following, toggle off
+    if (followingIcao === icao24) {
+      setFollowingIcao(null);
+      return;
+    }
+
+    // Check if plane is already in current data
+    const existing = displayPlanes.find((p) => p.icao24 === icao24);
+    if (existing) {
+      setFlyToTarget({ lat: existing.lat, lng: existing.lng });
+      setFollowingIcao(icao24);
+      return;
+    }
+
+    // Look up the plane globally via OpenSky
+    setLocatingPlane(icao24);
+    try {
+      const plane = await fetchPlaneByIcao24(icao24, credentials);
+      if (plane) {
+        setInjectedPlane(plane);
+        setFlyToTarget({ lat: plane.lat, lng: plane.lng });
+        setFollowingIcao(icao24);
+      } else {
+        setLocatingPlane(null);
+        alert('Plane not found — it may not be airborne right now.');
+        return;
+      }
+    } catch {
+      alert('Could not look up plane — rate limited. Try again shortly.');
+    }
+    setLocatingPlane(null);
+  }, [followingIcao, displayPlanes, credentials]);
+
+  // Clear injected plane when real data includes it
+  useEffect(() => {
+    if (injectedPlane && planes.some((p) => p.icao24 === injectedPlane.icao24)) {
+      setInjectedPlane(null);
+    }
+  }, [planes, injectedPlane]);
 
   // Find which favorites are currently nearby
   const nearbyIcaos = useMemo(() => {
@@ -130,7 +183,7 @@ export default function App() {
         <MapView
           homeCoords={homeCoords}
           displayName={displayName}
-          planes={displayPlanes}
+          planes={mergedPlanes}
           savedMapView={mapView}
           savedLayer={mapLayer}
           onMapMove={handleMapMove}
@@ -141,6 +194,8 @@ export default function App() {
           onTrack={addFavorite}
           onUntrack={removeFavorite}
           followingIcao={followingIcao}
+          flyToTarget={flyToTarget}
+          onFlyToArrived={() => setFlyToTarget(null)}
         />
 
         {showFavorites && (
@@ -159,7 +214,8 @@ export default function App() {
             onDeleteFolder={deleteFolder}
             onCreateTag={createTag}
             onDeleteTag={deleteTag}
-            onFollowPlane={(icao24) => setFollowingIcao((prev) => prev === icao24 ? null : icao24)}
+            onFollowPlane={handleFollowPlane}
+            locatingPlane={locatingPlane}
             followingIcao={followingIcao}
             onClose={() => setShowFavorites(false)}
           />

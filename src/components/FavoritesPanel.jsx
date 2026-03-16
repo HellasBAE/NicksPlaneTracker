@@ -6,7 +6,7 @@ export default function FavoritesPanel({
   onToggleFolder, onToggleTag,
   onCreateFolder, onRenameFolder, onDeleteFolder,
   onCreateTag, onDeleteTag,
-  onFollowPlane, followingIcao,
+  onFollowPlane, followingIcao, locatingPlane,
   onClose,
 }) {
   const [activeTab, setActiveTab] = useState('all'); // 'all' | folder id
@@ -144,6 +144,7 @@ export default function FavoritesPanel({
           {favList.map((fav) => {
             const isNearby = nearbyIcaos.has(fav.icao24);
             const isFollowing = followingIcao === fav.icao24;
+            const isLocating = locatingPlane === fav.icao24;
             const favTags = (fav.tags || []).map((id) => tags[id]).filter(Boolean);
 
             return (
@@ -152,14 +153,15 @@ export default function FavoritesPanel({
                   <div className="favorite-info" style={{ flex: 1 }}>
                     <div className="favorite-title-row">
                       <strong
-                        className={`favorite-name ${isNearby ? 'clickable' : ''}`}
-                        onClick={() => isNearby && onFollowPlane(fav.icao24)}
-                        title={isNearby ? 'Click to follow this plane' : ''}
+                        className="favorite-name clickable"
+                        onClick={() => onFollowPlane(fav.icao24)}
+                        title="Click to locate and follow this plane"
                       >
                         {displayName(fav)}
                       </strong>
+                      {isLocating && <span className="locating-badge">LOCATING...</span>}
                       {isNearby && <span className="nearby-badge">NEARBY</span>}
-                      {isFollowing && <span className="following-badge">FOLLOWING</span>}
+                      {isFollowing && !isLocating && <span className="following-badge">FOLLOWING</span>}
                     </div>
                     {fav.customName && fav.callsign && (
                       <div className="favorite-detail">Callsign: {fav.callsign}</div>

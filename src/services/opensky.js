@@ -22,6 +22,34 @@ export async function fetchPlanes(bbox, credentials) {
 
   if (!data.states) return [];
 
+  return parseStates(data);
+}
+
+/**
+ * Fetch a single plane by its ICAO24 hex code.
+ * Returns the plane object or null if not found / not airborne.
+ */
+export async function fetchPlaneByIcao24(icao24, credentials) {
+  const url = `https://opensky-network.org/api/states/all?icao24=${icao24.toLowerCase()}`;
+
+  const headers = {};
+  if (credentials?.username && credentials?.password) {
+    headers['Authorization'] = 'Basic ' + btoa(`${credentials.username}:${credentials.password}`);
+  }
+
+  const res = await fetch(url, { headers });
+
+  if (res.status === 429) throw new Error('RATE_LIMITED');
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  const planes = parseStates(data);
+  return planes.length > 0 ? planes[0] : null;
+}
+
+function parseStates(data) {
+  if (!data.states) return [];
+
   return data.states.map((s) => ({
     icao24: s[0],
     callsign: (s[1] || '').trim(),

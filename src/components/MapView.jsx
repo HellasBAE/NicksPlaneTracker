@@ -1,5 +1,5 @@
 import { MapContainer, TileLayer, LayersControl, useMap, useMapEvents } from 'react-leaflet';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import HomeMarker from './HomeMarker';
 import PlaneLayer from './PlaneLayer';
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from '../constants';
@@ -35,6 +35,23 @@ function FollowPlane({ planes, followingIcao }) {
       map.setView([plane.lat, plane.lng], map.getZoom(), { animate: true });
     }
   }, [planes, followingIcao, map]);
+
+  return null;
+}
+
+function FlyToTarget({ target, onArrived }) {
+  const map = useMap();
+  const [lastTarget, setLastTarget] = useState(null);
+
+  useEffect(() => {
+    if (!target || (lastTarget && target.lat === lastTarget.lat && target.lng === lastTarget.lng)) return;
+    setLastTarget(target);
+    map.flyTo([target.lat, target.lng], 12, { duration: 1.5 });
+    if (onArrived) {
+      const timer = setTimeout(onArrived, 1600);
+      return () => clearTimeout(timer);
+    }
+  }, [target, lastTarget, map, onArrived]);
 
   return null;
 }
@@ -93,7 +110,7 @@ const TILE_LAYERS = [
   },
 ];
 
-export default function MapView({ homeCoords, displayName, planes, savedMapView, savedLayer, onMapMove, onLayerChange, planeColor, planeSize, isFavorite, onTrack, onUntrack, followingIcao }) {
+export default function MapView({ homeCoords, displayName, planes, savedMapView, savedLayer, onMapMove, onLayerChange, planeColor, planeSize, isFavorite, onTrack, onUntrack, followingIcao, flyToTarget, onFlyToArrived }) {
   const initialCenter = savedMapView?.center
     ? [savedMapView.center.lat, savedMapView.center.lng]
     : DEFAULT_CENTER;
@@ -120,6 +137,7 @@ export default function MapView({ homeCoords, displayName, planes, savedMapView,
       <MapEventTracker onMapMove={onMapMove} onLayerChange={onLayerChange} />
       {homeCoords && <HomeMarker position={homeCoords} displayName={displayName} />}
       <FollowPlane planes={planes} followingIcao={followingIcao} />
+      <FlyToTarget target={flyToTarget} onArrived={onFlyToArrived} />
       <PlaneLayer planes={planes} planeColor={planeColor} planeSize={planeSize} isFavorite={isFavorite} onTrack={onTrack} onUntrack={onUntrack} />
     </MapContainer>
   );
