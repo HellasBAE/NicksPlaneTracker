@@ -593,46 +593,96 @@
   color: #ccc;
 }
 
-/* Folder tabs */
-.folder-tabs {
+/* Folder dropdown bar */
+.folder-bar {
   display: flex;
-  gap: 2px;
-  padding: 6px 8px;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
   background: #16213e;
   border-bottom: 1px solid #333;
-  overflow-x: auto;
   flex-shrink: 0;
 }
 
-.folder-tab {
-  padding: 4px 10px;
-  background: #2a2a4a;
-  color: #999;
-  border: none;
-  border-radius: 3px;
+.folder-select {
+  flex: 1;
+  padding: 6px 28px 6px 10px;
+  background: #0f1525;
+  color: #ccc;
+  border: 1px solid #333;
+  border-radius: 4px;
+  font-size: 0.8rem;
   cursor: pointer;
-  font-size: 0.75rem;
-  white-space: nowrap;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.folder-select:focus {
+  outline: none;
+  border-color: #ffd700;
+}
+
+.folder-select option {
+  background: #1a1a2e;
+  color: #ccc;
+}
+
+.folder-bar-actions {
   display: flex;
-  align-items: center;
   gap: 4px;
 }
 
-.folder-tab.active {
+.folder-action-btn {
+  padding: 5px 8px;
+  background: #2a2a4a;
+  color: #999;
+  border: 1px solid #333;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.folder-action-btn:hover {
+  background: #3a3a5a;
+  color: #ccc;
+}
+
+.folder-action-btn.danger {
+  color: #e94560;
+}
+
+.folder-action-btn.danger:hover {
+  background: rgba(233, 69, 96, 0.15);
+}
+
+.folder-create-row {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.folder-create-row input {
+  flex: 1;
+  padding: 5px 8px;
+  background: #0f1525;
+  color: #ccc;
+  border: 1px solid #ffd700;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.folder-create-row button {
+  padding: 5px 10px;
   background: #ffd700;
   color: #1a1a2e;
-  font-weight: 600;
-}
-
-.folder-tab:hover:not(.active) {
-  background: #3a3a5a;
-}
-
-.folder-tab.add-folder {
-  background: #333;
-  color: #888;
-  font-size: 0.9rem;
-  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.8rem;
 }
 
 .system-icon {
@@ -647,54 +697,7 @@
   font-weight: 800;
   border-radius: 2px;
   flex-shrink: 0;
-}
-
-.folder-delete {
-  font-size: 0.85rem;
-  opacity: 0.5;
-  cursor: pointer;
-  margin-left: 2px;
-}
-
-.folder-delete:hover {
-  opacity: 1;
-  color: #e94560;
-}
-
-.folder-rename-input {
-  width: 70px;
-  padding: 1px 4px;
-  background: #16213e;
-  color: #ccc;
-  border: 1px solid #ffd700;
-  border-radius: 2px;
-  font-size: 0.75rem;
-}
-
-.folder-create-inline {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.folder-create-inline input {
-  width: 90px;
-  padding: 3px 6px;
-  background: #16213e;
-  color: #ccc;
-  border: 1px solid #444;
-  border-radius: 3px;
-  font-size: 0.75rem;
-}
-
-.folder-create-inline button {
-  padding: 3px 8px;
-  background: #ffd700;
-  color: #1a1a2e;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  font-weight: 700;
+  margin-right: 2px;
 }
 
 /* Favorite item enhancements */

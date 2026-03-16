@@ -78,62 +78,62 @@ export default function FavoritesPanel({
         <button onClick={onClose} className="close-btn">&times;</button>
       </div>
 
-      {/* Folder tabs */}
-      <div className="folder-tabs">
-        <button
-          className={`folder-tab ${activeTab === 'all' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('all'); setShowManage(null); setConfirmingUntrack(null); }}
-        >
-          All
-        </button>
-        {folderList.map((folder) => (
-          <button
-            key={folder.id}
-            className={`folder-tab ${activeTab === folder.id ? 'active' : ''}`}
-            onClick={() => { setActiveTab(folder.id); setShowManage(null); setConfirmingUntrack(null); }}
-            onDoubleClick={() => { if (!folder.system) { setRenamingFolder(folder.id); setRenameText(folder.name); } }}
-            title={folder.system ? 'System folder' : 'Double-click to rename'}
-          >
-            {renamingFolder === folder.id ? (
-              <input
-                className="folder-rename-input"
-                value={renameText}
-                onChange={(e) => setRenameText(e.target.value)}
-                onBlur={() => handleRenameFolder(folder.id)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleRenameFolder(folder.id); if (e.key === 'Escape') setRenamingFolder(null); }}
-                autoFocus
-                onClick={(e) => e.stopPropagation()}
-              />
-            ) : (
-              <>
-                {folder.system && <span className="system-icon">S</span>}
-                {folder.name}
-                {!folder.system && (
-                  <span
-                    className="folder-delete"
-                    onClick={(e) => { e.stopPropagation(); onDeleteFolder(folder.id); if (activeTab === folder.id) setActiveTab('all'); }}
-                    title="Delete folder"
-                  >
-                    &times;
-                  </span>
-                )}
-              </>
-            )}
-          </button>
-        ))}
+      {/* Folder selector */}
+      <div className="folder-bar">
         {showCreateFolder ? (
-          <div className="folder-create-inline">
+          <div className="folder-create-row">
             <input
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
-              placeholder="Folder name"
+              placeholder="New folder name..."
               onKeyDown={(e) => { if (e.key === 'Enter') handleCreateFolder(); if (e.key === 'Escape') setShowCreateFolder(false); }}
               autoFocus
             />
-            <button onClick={handleCreateFolder}>+</button>
+            <button onClick={handleCreateFolder}>Create</button>
+            <button onClick={() => setShowCreateFolder(false)} style={{ background: '#333', color: '#ccc' }}>Cancel</button>
+          </div>
+        ) : renamingFolder ? (
+          <div className="folder-create-row">
+            <input
+              value={renameText}
+              onChange={(e) => setRenameText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleRenameFolder(renamingFolder); if (e.key === 'Escape') setRenamingFolder(null); }}
+              autoFocus
+            />
+            <button onClick={() => handleRenameFolder(renamingFolder)}>Rename</button>
+            <button onClick={() => setRenamingFolder(null)} style={{ background: '#333', color: '#ccc' }}>Cancel</button>
           </div>
         ) : (
-          <button className="folder-tab add-folder" onClick={() => setShowCreateFolder(true)}>+</button>
+          <>
+            <select
+              className="folder-select"
+              value={activeTab}
+              onChange={(e) => { setActiveTab(e.target.value); setShowManage(null); setConfirmingUntrack(null); }}
+            >
+              <option value="all">All Planes ({Object.keys(favorites).length})</option>
+              {folderList.map((folder) => {
+                const count = Object.values(favorites).filter((f) => (f.folders || []).includes(folder.id)).length;
+                return (
+                  <option key={folder.id} value={folder.id}>
+                    {folder.system ? '[S] ' : ''}{folder.name} ({count})
+                  </option>
+                );
+              })}
+            </select>
+            <div className="folder-bar-actions">
+              <button className="folder-action-btn" onClick={() => setShowCreateFolder(true)} title="New folder">+</button>
+              {activeTab !== 'all' && (() => {
+                const f = folders[activeTab];
+                if (!f) return null;
+                return !f.system ? (
+                  <>
+                    <button className="folder-action-btn" onClick={() => { setRenamingFolder(activeTab); setRenameText(f.name); }} title="Rename">Rename</button>
+                    <button className="folder-action-btn danger" onClick={() => { onDeleteFolder(activeTab); setActiveTab('all'); }} title="Delete">Delete</button>
+                  </>
+                ) : null;
+              })()}
+            </div>
+          </>
         )}
       </div>
 

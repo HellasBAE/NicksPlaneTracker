@@ -8,7 +8,14 @@
       "Bash(npx:*)",
       "Bash(cp:*)",
       "Bash(npm install:*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(gh repo:*)",
+      "WebFetch(domain:nicks-plane-tracker.vercel.app)",
+      "WebFetch(domain:api.planespotters.net)",
+      "WebFetch(domain:en.wikipedia.org)",
+      "Bash(git add:*)",
+      "Bash(for reg:*)",
+      "WebSearch"
     ]
   }
 }
