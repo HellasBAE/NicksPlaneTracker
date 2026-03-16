@@ -186,13 +186,11 @@ export default function FavoritesPanel({
                       </div>
                     )}
                   </div>
-                  {!isSystem && (
-                    <div className="favorite-actions">
-                      <button onClick={() => setShowManage(showManage === fav.icao24 ? null : fav.icao24)} className="manage-btn" title="Manage">
-                        ...
-                      </button>
-                    </div>
-                  )}
+                  <div className="favorite-actions">
+                    <button onClick={() => setShowManage(showManage === fav.icao24 ? null : fav.icao24)} className="manage-btn" title="Manage">
+                      ...
+                    </button>
+                  </div>
                 </div>
 
                 {/* Manage dropdown */}
@@ -262,18 +260,20 @@ export default function FavoritesPanel({
                       </div>
                     </div>
 
-                    {/* Untrack with confirmation */}
-                    <div className="manage-section untrack-section">
-                      {confirmingUntrack === fav.icao24 ? (
-                        <div className="untrack-confirm">
-                          <span>Untrack this plane?</span>
-                          <button className="untrack-yes" onClick={() => { onRemove(fav.icao24); setConfirmingUntrack(null); setShowManage(null); }}>Yes, Untrack</button>
-                          <button className="untrack-no" onClick={() => setConfirmingUntrack(null)}>Cancel</button>
-                        </div>
-                      ) : (
-                        <button className="untrack-btn" onClick={() => setConfirmingUntrack(fav.icao24)}>Untrack Plane</button>
-                      )}
-                    </div>
+                    {/* Untrack with confirmation (not for system planes) */}
+                    {!isSystem && (
+                      <div className="manage-section untrack-section">
+                        {confirmingUntrack === fav.icao24 ? (
+                          <div className="untrack-confirm">
+                            <span>Untrack this plane?</span>
+                            <button className="untrack-yes" onClick={() => { onRemove(fav.icao24); setConfirmingUntrack(null); setShowManage(null); }}>Yes, Untrack</button>
+                            <button className="untrack-no" onClick={() => setConfirmingUntrack(null)}>Cancel</button>
+                          </div>
+                        ) : (
+                          <button className="untrack-btn" onClick={() => setConfirmingUntrack(fav.icao24)}>Untrack Plane</button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 

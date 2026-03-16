@@ -68,10 +68,16 @@ export function useFavorites() {
     });
   }, []);
 
+  // Helper: get the effective favorite (user override or seeded)
+  const getEffective = (prev, icao24) => {
+    return prev[icao24] || SEEDED_PLANES[icao24] || null;
+  };
+
   const updateFavorite = useCallback((icao24, updates) => {
     setFavorites((prev) => {
-      if (!prev[icao24]) return prev;
-      return { ...prev, [icao24]: { ...prev[icao24], ...updates } };
+      const fav = getEffective(prev, icao24);
+      if (!fav) return prev;
+      return { ...prev, [icao24]: { ...fav, ...updates } };
     });
   }, []);
 
@@ -85,7 +91,7 @@ export function useFavorites() {
 
   const toggleFavoriteFolder = useCallback((icao24, folderId) => {
     setFavorites((prev) => {
-      const fav = prev[icao24];
+      const fav = getEffective(prev, icao24);
       if (!fav) return prev;
       const folders = fav.folders || [];
       const next = folders.includes(folderId)
@@ -97,7 +103,7 @@ export function useFavorites() {
 
   const toggleFavoriteTag = useCallback((icao24, tagId) => {
     setFavorites((prev) => {
-      const fav = prev[icao24];
+      const fav = getEffective(prev, icao24);
       if (!fav) return prev;
       const tags = fav.tags || [];
       const next = tags.includes(tagId)
